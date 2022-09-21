@@ -45,6 +45,7 @@ class WaypointGenerator : public usm::StateMachine<PlannerState> {
   Eigen::Vector3f desired_vel_ = Eigen::Vector3f(NAN, NAN, NAN);
   Eigen::Vector3f change_altitude_pos_ = Eigen::Vector3f(NAN, NAN, NAN);
   Eigen::Vector3f hover_position_ = Eigen::Vector3f(NAN, NAN, NAN);
+  float goal_yaw_rad_ = NAN;
 
   float curr_yaw_rad_ = NAN;
   float curr_pitch_deg_ = NAN;
@@ -163,7 +164,7 @@ class WaypointGenerator : public usm::StateMachine<PlannerState> {
   * @param[in] desired_vel, velocity setpoint from the Firmware
   **/
   void updateState(const Eigen::Vector3f& act_pose, const Eigen::Quaternionf& q, const Eigen::Vector3f& goal,
-                   const Eigen::Vector3f& prev_goal, const Eigen::Vector3f& vel, bool stay, bool is_airborne,
+                   const Eigen::Vector3f& prev_goal, const Eigen::Vector3f& vel, const Eigen::Quaternionf& goal_orientation, bool stay, bool is_airborne,
                    const NavigationState& nav_state, const bool is_land_waypoint, const bool is_takeoff_waypoint,
                    const Eigen::Vector3f& desired_vel);
 

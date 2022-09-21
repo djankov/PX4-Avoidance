@@ -283,7 +283,7 @@ MAV_STATE LocalPlannerNodelet::getSystemStatus() { return avoidance_node_->getSy
 void LocalPlannerNodelet::calculateWaypoints(bool hover) {
   bool is_airborne = armed_ && (nav_state_ != NavigationState::none);
 
-  wp_generator_->updateState(newest_position_, newest_orientation_, goal_position_, prev_goal_position_, velocity_,
+  wp_generator_->updateState(newest_position_, newest_orientation_, goal_position_, prev_goal_position_, velocity_, goal_orientation_,
                              hover, is_airborne, nav_state_, is_land_waypoint_, is_takeoff_waypoint_,
                              desired_velocity_);
   waypointResult result = wp_generator_->getWaypoints();
@@ -332,6 +332,7 @@ void LocalPlannerNodelet::updateGoalCallback(const visualization_msgs::MarkerArr
   if (accept_goal_input_topic_ && msg.markers.size() > 0) {
     prev_goal_position_ = goal_position_;
     goal_position_ = toEigen(msg.markers[0].pose.position);
+    goal_orientation_ = toEigen(msg.markers[0].pose.orientation);
     new_goal_ = true;
   }
 }

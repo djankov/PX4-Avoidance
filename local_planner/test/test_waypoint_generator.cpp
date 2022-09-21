@@ -55,7 +55,7 @@ class WaypointGeneratorTests : public ::testing::Test, public WaypointGenerator 
     is_takeoff_waypoint = false;
     desired_velocity = Eigen::Vector3f(NAN, NAN, NAN);
 
-    updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+    updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
                 is_takeoff_waypoint, desired_velocity);
     setPlannerInfo(avoidance_output);
     FOV fov(0.0f, 0.0f, 270.f, 45.f);
@@ -80,7 +80,7 @@ TEST_F(WaypointGeneratorTests, reachAltitudeTest) {
 
   // WHEN: we generate the first waypoint
   time = ros::Time(time_sec);
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   waypointResult result = getWaypoints();  // state LOITER
   result = getWaypoints();                 // state TRY_PATH
@@ -97,7 +97,7 @@ TEST_F(WaypointGeneratorTests, reachAltitudeTest) {
     // calculate new vehicle position
     time_sec += 0.03;
     time = ros::Time(time_sec);
-    updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+    updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
                 is_takeoff_waypoint, desired_velocity);
     waypointResult result = getWaypoints();
 
@@ -159,7 +159,7 @@ TEST_F(WaypointGeneratorTests, reachAltitudeOffboardTest) {
 
   // WHEN: we generate the first waypoint
   time = ros::Time(time_sec);
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   waypointResult result = getWaypoints();
   result = getWaypoints();
@@ -171,7 +171,7 @@ TEST_F(WaypointGeneratorTests, reachAltitudeOffboardTest) {
     // calculate new vehicle position
     time_sec += 0.03;
     time = ros::Time(time_sec);
-    updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+    updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
                 is_takeoff_waypoint, desired_velocity);
     waypointResult result = getWaypoints();
 
@@ -194,7 +194,7 @@ TEST_F(WaypointGeneratorTests, reachAltitudeOffboardTest) {
 
   time_sec += 0.03;
   time = ros::Time(time_sec);
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   result = getWaypoints();
   ASSERT_EQ(PlannerState::TRY_PATH, getState());
@@ -212,7 +212,7 @@ TEST_F(WaypointGeneratorTests, goStraightTest) {
   float pos_sp_to_goal_prev = 1000.0f;
   double time_sec = time.toSec();
 
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
 
   waypointResult result = getWaypoints();
@@ -221,7 +221,7 @@ TEST_F(WaypointGeneratorTests, goStraightTest) {
   for (size_t i = 0; i < 10; i++) {
     time_sec += 0.03;
     time = ros::Time(time_sec);
-    updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+    updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
                 is_takeoff_waypoint, desired_velocity);
 
     waypointResult result = getWaypoints();
@@ -263,7 +263,7 @@ TEST_F(WaypointGeneratorTests, hoverTest) {
   double time_sec = 0.0;
   time = ros::Time(time_sec);
   stay = true;
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   waypointResult result = getWaypoints();
   ASSERT_EQ(PlannerState::LOITER, getState());
@@ -271,7 +271,7 @@ TEST_F(WaypointGeneratorTests, hoverTest) {
   setPlannerInfo(avoidance_output);
   time_sec += 0.033;
   time = ros::Time(time_sec);
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
 
   // WHEN: we generate waypoints
@@ -312,7 +312,7 @@ TEST_F(WaypointGeneratorTests, trypathTreeAvailableTest) {
   for (size_t i = 0; i < 10; i++) {
     time_sec += 0.033;
     time = ros::Time(time_sec);
-    updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+    updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
                 is_takeoff_waypoint, desired_velocity);
 
     waypointResult result = getWaypoints();
@@ -345,14 +345,14 @@ TEST_F(WaypointGeneratorTests, trypathTreeAvailableTest) {
 TEST_F(WaypointGeneratorTests, trypathToLoiterTest) {
   // GIVEN: a waypoint of type tryPath
   setPlannerInfo(avoidance_output);
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   waypointResult result = getWaypoints();
   ASSERT_EQ(PlannerState::TRY_PATH, getState());
 
   // WHEN: we generate waypoints with stay true
   stay = true;
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   result = getWaypoints();
 
@@ -372,7 +372,7 @@ TEST_F(WaypointGeneratorTests, AltitudeChangeLandTest) {
   // WHEN: the navigation state switches to auto_land
   nav_state = NavigationState::auto_land;
   desired_velocity = Eigen::Vector3f(NAN, NAN, -0.7f);
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   result = getWaypoints();
 
@@ -397,7 +397,7 @@ TEST_F(WaypointGeneratorTests, AltitudeChangeLandTest) {
   position.z() = new_pos_z;
 
   // WHEN: we go trough another iteration
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   result = getWaypoints();
 
@@ -420,7 +420,7 @@ TEST_F(WaypointGeneratorTests, directToAltitudeChangeTest) {
   goal << 10.f, 10.f, 5.f;
   avoidance_output.path_node_positions.clear();
   setPlannerInfo(avoidance_output);
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   waypointResult result = getWaypoints();
   ASSERT_EQ(PlannerState::TRY_PATH, getState());
@@ -431,7 +431,7 @@ TEST_F(WaypointGeneratorTests, directToAltitudeChangeTest) {
   nav_state = NavigationState::auto_rtl;
   goal << 5.f, 5.f, 15.f;
   desired_velocity = Eigen::Vector3f(NAN, NAN, 1.f);
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   result = getWaypoints();
 
@@ -449,7 +449,7 @@ TEST_F(WaypointGeneratorTests, directToTryPathTest) {
   ASSERT_EQ(PlannerState::LOITER, getState());
   avoidance_output.path_node_positions.clear();
   setPlannerInfo(avoidance_output);
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   waypointResult result = getWaypoints();
   ASSERT_EQ(PlannerState::TRY_PATH, getState());
@@ -470,7 +470,7 @@ TEST_F(WaypointGeneratorTests, directToLoiterTest) {
   ASSERT_EQ(PlannerState::LOITER, getState());
   avoidance_output.path_node_positions.clear();
   setPlannerInfo(avoidance_output);
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   waypointResult result = getWaypoints();
   ASSERT_EQ(PlannerState::TRY_PATH, getState());
@@ -479,7 +479,7 @@ TEST_F(WaypointGeneratorTests, directToLoiterTest) {
 
   // WHEN: the failsafe flag stay is set to true
   stay = true;
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   result = getWaypoints();
 
@@ -491,7 +491,7 @@ TEST_F(WaypointGeneratorTests, altitudeChangeToLoiterTest) {
   // GIVEN: a staring condition in LOITER state and a takeoff waypoint
   ASSERT_EQ(PlannerState::LOITER, getState());
   is_takeoff_waypoint = true;
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   waypointResult result = getWaypoints();
   ASSERT_EQ(PlannerState::TRY_PATH, getState());
@@ -500,7 +500,7 @@ TEST_F(WaypointGeneratorTests, altitudeChangeToLoiterTest) {
 
   // WHEN: the failsafe flag stay is set to true
   stay = true;
-  updateState(position, q, goal, prev_goal, velocity, stay, is_airborne, nav_state, is_land_waypoint,
+  updateState(position, q, goal, prev_goal, velocity, q, stay, is_airborne, nav_state, is_land_waypoint,
               is_takeoff_waypoint, desired_velocity);
   result = getWaypoints();
 

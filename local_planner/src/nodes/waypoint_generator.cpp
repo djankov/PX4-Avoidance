@@ -225,13 +225,14 @@ void WaypointGenerator::setFOV(int i, const FOV& fov) {
 
 void WaypointGenerator::updateState(const Eigen::Vector3f& act_pose, const Eigen::Quaternionf& q,
                                     const Eigen::Vector3f& goal, const Eigen::Vector3f& prev_goal,
-                                    const Eigen::Vector3f& vel, bool stay, bool is_airborne,
+                                    const Eigen::Vector3f& vel, const Eigen::Quaternionf& goal_orientation, bool stay, bool is_airborne,
                                     const NavigationState& nav_state, const bool is_land_waypoint,
                                     const bool is_takeoff_waypoint, const Eigen::Vector3f& desired_vel) {
   std::lock_guard<std::mutex> lock(running_mutex_);
   position_ = act_pose;
   velocity_ = vel;
   goal_ = goal;
+  goal_yaw_rad_ = getYawFromQuaternion(goal_orientation) * DEG_TO_RAD;
   prev_goal_ = prev_goal;
   curr_yaw_rad_ = getYawFromQuaternion(q) * DEG_TO_RAD;
   curr_pitch_deg_ = getPitchFromQuaternion(q);
@@ -310,7 +311,7 @@ void WaypointGenerator::nextSmoothYaw(float dt) {
   // and we dont want to introduce yet another parameter
 
   float desired_setpoint_yaw_rad =
-      (position_ - output_.goto_position).normXY() > 0.1f ? nextYaw(position_, output_.goto_position) : curr_yaw_rad_;
+      (position_ - output_.goto_position).normXY() > 0.1f ? nextYaw(position_, output_.goto_position) : goal_yaw_rad_;
 
   if (getState() == PlannerState::ALTITUDE_CHANGE) {
     desired_setpoint_yaw_rad = yaw_reach_height_rad_;

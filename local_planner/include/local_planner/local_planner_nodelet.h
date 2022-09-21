@@ -223,6 +223,7 @@ class LocalPlannerNodelet : public nodelet::Nodelet {
   Eigen::Vector3f desired_velocity_;
   Eigen::Vector3f goal_position_;
   Eigen::Vector3f prev_goal_position_;
+  Eigen::Quaternionf goal_orientation_;
 
   NavigationState nav_state_ = NavigationState::none;
 
