@@ -310,15 +310,17 @@ void WaypointGenerator::nextSmoothYaw(float dt) {
   // Use xy smoothing constant for yaw, since this makes more sense than z,
   // and we dont want to introduce yet another parameter
 
+  bool far_from_goto_position = (position_ - output_.goto_position).normXY() > 0.1f;
+
   float desired_setpoint_yaw_rad =
-      (position_ - output_.goto_position).normXY() > 0.1f ? nextYaw(position_, output_.goto_position) : goal_yaw_rad_;
+      far_from_goto_position ? nextYaw(position_, output_.goto_position) : goal_yaw_rad_;
 
   if (getState() == PlannerState::ALTITUDE_CHANGE) {
     desired_setpoint_yaw_rad = yaw_reach_height_rad_;
   }
 
-  // If smoothing is disabled, set yaw to face goal directly
-  if (smoothing_speed_xy_ <= 0.01f) {
+  // If smoothing is disabled or close to goto position, set yaw to desired goal yaw
+  if (smoothing_speed_xy_ <= 0.01f || !far_from_goto_position) {
     setpoint_yaw_rad_ = desired_setpoint_yaw_rad;
     return;
   }
@@ -359,7 +361,7 @@ void WaypointGenerator::adaptSpeed(float dt) {
     speed_ = goal_dist;
     // First time we reach this goal, remember the heading
     if (!std::isfinite(heading_at_goal_rad_)) {
-      heading_at_goal_rad_ = curr_yaw_rad_;
+      heading_at_goal_rad_ = goal_yaw_rad_;
     }
     setpoint_yaw_rad_ = heading_at_goal_rad_;
   } else {
