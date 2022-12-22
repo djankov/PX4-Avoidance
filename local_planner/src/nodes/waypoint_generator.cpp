@@ -233,6 +233,7 @@ void WaypointGenerator::updateState(const Eigen::Vector3f& act_pose, const Eigen
   velocity_ = vel;
   goal_ = goal;
   goal_yaw_rad_ = getYawFromQuaternion(goal_orientation) * DEG_TO_RAD;
+  heading_at_goal_rad_ = NAN;
   prev_goal_ = prev_goal;
   curr_yaw_rad_ = getYawFromQuaternion(q) * DEG_TO_RAD;
   curr_pitch_deg_ = getPitchFromQuaternion(q);
